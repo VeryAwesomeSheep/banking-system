@@ -1,3 +1,15 @@
+/*
+In a lot of scanf's there could be a anti overflow safety measure but I wanted to be able to prompt users when their inputs are too long.
+I could have used for ex. "%49s" but then I couldn't make that prompt. 
+Well.. actually I could allocate +1 memory for inputs and limit the input to that and then propmt the user.
+
+input[51]
+scanf("%50s")
+if (strlen(input) > 49)
+
+TODO: ^
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,9 +22,8 @@
 
 client *Client;
 
-void menuNotLoggedIn() {
-	mkdir("accounts");
-
+void menuNotLoggedIn() { // Menu for not logged in users
+	mkdir("accounts"); // Creates folder for accounts if doesn't exists
 	srand(time(NULL));
 	int menuChoice;
 
@@ -43,11 +54,11 @@ void menuNotLoggedIn() {
 	} while (menuChoice != 0);
 }
 
-void menuLoggedIn(char *accountNumberLoggedIn) {
+void menuLoggedIn(char *accountNumberLoggedIn) { // Menu for not logged in users
 	int menuChoice;
-	Client = (client*)malloc(sizeof(client));
+	Client = (client*)malloc(sizeof(client)); // Allocating dynamic memory for clinet's data
 	
-	strcpy(Client->firstName, readLine(accountNumberLoggedIn, 1));
+	strcpy(Client->firstName, readLine(accountNumberLoggedIn, 1)); // Reading client's data from file
 	strcpy(Client->lastName, readLine(accountNumberLoggedIn, 2));
 	strcpy(Client->pesel, readLine(accountNumberLoggedIn, 3));
 	strcpy(Client->nationality, readLine(accountNumberLoggedIn, 4));
@@ -108,14 +119,14 @@ void menuLoggedIn(char *accountNumberLoggedIn) {
 	} while (menuChoice != 0);
 }
 
-void logIn() {
+void logIn() { // Log in interface
 	char accountNumber[27], password[50], passwordInput[50];
 
 	printf("Account number: ");
 	scanf("%s", &accountNumber);
 	printf("Password: ");
 	scanf("%s", &passwordInput);
-	strcpy(password, readLine(accountNumber, 9));
+	strcpy(password, readLine(accountNumber, 9)); // Check if input matches password
 	if (strcmp(password, passwordInput) == 0) {
 		menuLoggedIn(accountNumber);
 	}
@@ -126,7 +137,7 @@ void logIn() {
 	}
 }
 
-void createAccount() {
+void createAccount() { // Account creation interface
 	FILE *fCreateAccount;
 	char temp;
 	char fName[41];
@@ -144,8 +155,8 @@ void createAccount() {
 		cls();
 		printf("Enter your first name: ");
 		scanf("%s", &firstName);
-		if (stopOperation(firstName) == 1) return;
-		if (49 < strlen(firstName)) {
+		if (stopOperation(firstName) == 1) return; // If user inputs "q" then process stops
+		if (49 < strlen(firstName)) { // If user enters more characters than he should he gets prompted to do it again
 			cls();
 			printf("First name cannot be longer than 49 characters! Ex. \"John\".\n\nPress enter to continue.\n");
 			getch();
@@ -204,7 +215,7 @@ void createAccount() {
 	do {
 		cls();
 		printf("Enter your address: ");
-		scanf("%[^\n]%*c", &address);
+		scanf("%[^\n]%*c", &address); // scanf format to accept spaces
 		if (stopOperation(address) == 1) return;
 		if (99 < strlen(address)) {
 			cls();
@@ -237,7 +248,7 @@ void createAccount() {
 		}
 	} while (49 < strlen(password));
 
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) { // Account number generation
         int j = rand() % 10;
         sprintf(generatedDigit, "%d", j);
         strcat(generatedNumber, generatedDigit);
@@ -245,7 +256,7 @@ void createAccount() {
     strcat(accountNumber, prefix);
     strcat(accountNumber, generatedNumber);
 
-	sprintf(fName, "accounts/%s.txt", accountNumber);
+	sprintf(fName, "accounts/%s.txt", accountNumber); // Account file path generation
 	fCreateAccount = fopen(fName, "w");
 	if (fCreateAccount == NULL) {
 		printf("\nFailed to open file.");
@@ -253,19 +264,19 @@ void createAccount() {
 		return;
 	}
 
-	fprintf(fCreateAccount, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n----------------\n----\n0.00\n\n", firstName, lastName, pesel, nationality, idNumber, address, phoneNumber, accountNumber, password);
+	fprintf(fCreateAccount, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n----------------\n----\n0.00\n\n", firstName, lastName, pesel, nationality, idNumber, address, phoneNumber, accountNumber, password); // Putting data to file
 	fclose(fCreateAccount);
 	cls();
 	printf("Congratulations!\n\nYour account has been successfully created.\nYour account number: %s.\n\nTo log in use this account number and your password.\n\nPress enter to continue.", accountNumber);
 	getch();
 }
 
-void displayBalance(char *accountNumber, float balance) { // displays clients account balance
+void displayBalance(char *accountNumber, float balance) { // Displays clients account balance
 	printf("Account: %s\nBalance: %.2f PLN\n\nPress enter to come back.", accountNumber, balance);
 	getch();
 }
 
-void transferMoney(char *accountNumberSender, float balance) {
+void transferMoney(char *accountNumberSender, float balance) { // Money transfer between accounts
 	int menuChoice;
 	char temp;
 	char accountNumberRecepient[27], recordSender[200], recordRecepient[200], transferTitle[100] = "";
@@ -275,13 +286,13 @@ void transferMoney(char *accountNumberSender, float balance) {
 	do {
 		printf("To abort enter \"q\".\n\nEnter recepient's account number: ");
 		scanf("%26s", &accountNumberRecepient);
-		if (stopOperation(accountNumberRecepient) == 1) return;
-		if (strcmp(accountNumberSender, accountNumberRecepient) == 0) {
+		if (stopOperation(accountNumberRecepient) == 1) return; // If user inputs "q" then process stops
+		if (strcmp(accountNumberSender, accountNumberRecepient) == 0) { // Check if user tries to send money to himself
 			cls();
 			printf("You cannot address a transfer to yourself.\n\nPress enter to continue.\n");
 			getch();
 		}
-		if (accountExistsCheck(accountNumberRecepient) == 0) {
+		if (accountExistsCheck(accountNumberRecepient) == 0) { // Check if recepient's account exists
 			cls();
 			printf("Account with such number doesn't exist.\n\nPress enter to continue.\n");
 			getch();
@@ -292,13 +303,13 @@ void transferMoney(char *accountNumberSender, float balance) {
 		cls();
 		printf("To abort enter \"0\".\n\nEnter transfer amount: ");
 		scanf("%f", &amount);
-		if (amount == 0) return;
-		if (amount < 0) {
+		if (amount == 0) return; // If user inputs "0" then process stops
+		if (amount < 0) { // Check if user tries to send negative amount
 			cls();
 			printf("Amount must be higher than 0.00 PLN.\n\nPress enter to continue.\n");
 			getch();
 		}
-		if (amount > balance) {
+		if (amount > balance) { // Check if user has enough money
 			cls();
 			printf("You can't make that operation. Entered amount is higher than your balance.\n\nPress enter to continue.\n");
 			getch();
@@ -309,7 +320,7 @@ void transferMoney(char *accountNumberSender, float balance) {
 	do {
 		cls();
 		printf("To abort enter \"q\".\n\nEnter transfer title: ");
-		scanf("%[^\n]%*c", &transferTitle);
+		scanf("%[^\n]%*c", &transferTitle); // scanf format to accept spaces
 		if (stopOperation(transferTitle) == 1) return;
 		if (99 < strlen(transferTitle)) {
 			cls();
@@ -318,7 +329,7 @@ void transferMoney(char *accountNumberSender, float balance) {
 		}
 	} while (99 < strlen(transferTitle));
 
-	do {
+	do { // Confirmation of transfer
 		cls();
 		printf("Recipient account number: %s\nTransfer amount: %.2f\nTransfer title: %s\n\n1. Confirm\n2. Abort\n", accountNumberRecepient, amount, transferTitle);
 		scanf("%d", &menuChoice);
@@ -329,24 +340,24 @@ void transferMoney(char *accountNumberSender, float balance) {
 			sprintf(fAccountNumberSender, "accounts/%s.txt", accountNumberSender);
 			sprintf(fAccountNumberRecepient, "accounts/%s.txt", accountNumberRecepient);
 
-			FILE *fSender = fopen(fAccountNumberSender, "a");
+			FILE *fSender = fopen(fAccountNumberSender, "a"); // Opening account files
 			FILE *fRecepient = fopen(fAccountNumberRecepient, "a");
 
-			time_t rawtime;
+			time_t rawtime; // Creating current date info
 			struct tm * timeinfo;
 			time (&rawtime);
 			timeinfo = localtime (&rawtime);
 
-			sprintf(recordSender, "Date: %sAmount: %.2f PLN    Account number: %s    Title: \"%s\"\n", asctime(timeinfo), amount * -1, accountNumberRecepient, transferTitle);
+			sprintf(recordSender, "Date: %sAmount: %.2f PLN    Account number: %s    Title: \"%s\"\n", asctime(timeinfo), amount * -1, accountNumberRecepient, transferTitle); // Creating records
 			sprintf(recordRecepient, "Date: %sAmount: +%.2f PLN    Account number: %s    Title: \"%s\"\n", asctime(timeinfo), amount, accountNumberRecepient, transferTitle);
 
-			fprintf(fSender, "%s\n", recordSender);
+			fprintf(fSender, "%s\n", recordSender); // Putting records to files
 			fprintf(fRecepient, "%s\n", recordRecepient);
 
 			fclose(fSender);
 			fclose(fRecepient);
 
-			updateBalance(accountNumberSender, amount * -1);
+			updateBalance(accountNumberSender, amount * -1); // Updating account balances
 			updateBalance(accountNumberRecepient, amount);
 
 			cls();
@@ -366,16 +377,16 @@ void transferMoney(char *accountNumberSender, float balance) {
 	} while (menuChoice != 2);
 }
 
-void cashDeposit(char *accountNumber) {
+void cashDeposit(char *accountNumber) { // Cash deposit (in this case it's a money printer)
 	int menuChoice;
 	char fAccountNumber[41], record[200];
 	float amount;
 
 	printf("Enter amount to deposit: ");
 	scanf("%f", &amount);
-	if (amount == 0) return;
+	if (amount == 0) return; // If user inputs "0" then process stops
 
-	do {
+	do { // Deposit confirmation
 		cls();
 		printf("Amount to deposit: %.2f\n\n1. Confirm\n2. Abort\n", amount);
 		scanf("%d", &menuChoice);
@@ -417,20 +428,20 @@ void cashDeposit(char *accountNumber) {
 	} while (menuChoice != 2);
 }
 
-void creditCard(char *accountNumber, char *cardNumber, char *cardPin) {
+void creditCard(char *accountNumber, char *cardNumber, char *cardPin) { // Displaying credit card data and if it doesn't exists creating one
 	int menuChoice;
 	char generatedCard[17] = "", generatedCardDigit[2], generatedCardNumber[11] = "", generatedPin[5] = "", generatedPinDigit[2]; 
 	static char cardPrefix[7] = "405671";
 
-	if (strcmp(cardNumber, "----------------") == 0 && strcmp(cardPin, "----") == 0) {
+	if (strcmp(cardNumber, "----------------") == 0 && strcmp(cardPin, "----") == 0) { // Check if credit card exists
 		do {
-			printf("You don't have a credit card.\n\nWould you like to generate one?\n1. Yes\n2. No\n");
+			printf("You don't have a credit card.\n\nWould you like to generate one?\n1. Yes\n2. No\n"); // Ask if user wants to create credit card
 			scanf("%d", &menuChoice);
 
 			switch (menuChoice)
 			{
 			case 1:
-				for (int h = 0; h < 10; h++) {
+				for (int h = 0; h < 10; h++) { // Generating credit card number
 					int k = rand() % 10;
 					sprintf(generatedCardDigit, "%d", k);
 					strcat(generatedCardNumber, generatedCardDigit);
@@ -438,13 +449,13 @@ void creditCard(char *accountNumber, char *cardNumber, char *cardPin) {
 				strcat(generatedCard, cardPrefix);
 				strcat(generatedCard, generatedCardNumber);
 
-				for (int u = 0; u < 4; u++) {
+				for (int u = 0; u < 4; u++) { // Generating credit card pin
 					int p = rand() % 10;
 					sprintf(generatedPinDigit, "%d", p);
 					strcat(generatedPin, generatedPinDigit);
 				}
 
-				updateFile(accountNumber, 10, generatedCard);
+				updateFile(accountNumber, 10, generatedCard); // Adding credit card info to account file
 				updateFile(accountNumber, 11, generatedPin);
 				
 				cls();
@@ -463,13 +474,13 @@ void creditCard(char *accountNumber, char *cardNumber, char *cardPin) {
 			}
 		} while (menuChoice != 2);
 	} else {
-		printf("Your credit card data:\nNumber: %s\nPin: %s\n\nPress enter to come back.", cardNumber, cardPin);
+		printf("Your credit card data:\nNumber: %s\nPin: %s\n\nPress enter to come back.", cardNumber, cardPin); // If card exists, printing out the details
 		getch();
 		return;
 	}
 }
 
-void displayHistory(char *accountNumber) {
+void displayHistory(char *accountNumber) { // Displaying operations history
 	char fAccountNumber[41], lineContent[100];
 	int counter = 1;
 	
@@ -480,13 +491,13 @@ void displayHistory(char *accountNumber) {
 		goto jump;
 	}
 
-	while (counter < 13) {
+	while (counter < 13) { // Going to line 13 where history starts
 		fgets(lineContent, 100, f);
 		counter++;
 	}
 
 	printf("History of your transactions:\n");
-	while (fgets(lineContent, 100, f) != NULL) {
+	while (fgets(lineContent, 100, f) != NULL) { // Printing history
 		printf("%s", lineContent);
 	}
 	jump:
@@ -496,15 +507,15 @@ void displayHistory(char *accountNumber) {
 	getch();
 }
 
-void manageData(char *firstName, char *lastName, char *pesel, char *nationality, char *idNumber, char *address, char *phoneNumber, char *password) {
+void manageData(char *firstName, char *lastName, char *pesel, char *nationality, char *idNumber, char *address, char *phoneNumber, char *password) { // Managing user data
 	int menuChoice;
 	char newFirstName[50], newLastName[50], newPesel[12], newNationality[50], newIdNumber[10], newAddress[100], newPhoneNhmber[10], newPassword[50];
 	char temp;
 
 	do {
 		cls();
-		printf("Your data: \nFirst name: %s\nLast name: %s\nPESEL: %s\nNationality: %s\nID number: %s\nAddress: %s\nPhone: %s\nPassword: %s\n\n", firstName, lastName, pesel, nationality, idNumber, address, phoneNumber, password);
-		printf("Would you like to change anything? Please select option or abort.\n");
+		printf("Your data: \nFirst name: %s\nLast name: %s\nPESEL: %s\nNationality: %s\nID number: %s\nAddress: %s\nPhone: %s\nPassword: %s\n\n", firstName, lastName, pesel, nationality, idNumber, address, phoneNumber, password); // Printing current user data
+		printf("Would you like to change anything? Please select option or abort.\n"); // Ask if user want's to change anything
 		printf("1. First name\n2. Last name\n3. PESEL\n4. Nationality\n5. ID number\n6. Address\n7. Phone\n8. Password\n0. Abort\n");
 		scanf("%d", &menuChoice);
 
@@ -517,15 +528,15 @@ void manageData(char *firstName, char *lastName, char *pesel, char *nationality,
 			do {
 				cls();
 				printf("To abort enter \"q\".\n\nEnter your new first name: ");
-				scanf("%s", &newFirstName);
-				if (stopOperation(newFirstName) == 1) break;
-				if (49 < strlen(newFirstName)) {
+				scanf("%s", &newFirstName); // Ask for new name
+				if (stopOperation(newFirstName) == 1) break; // If user inputs "q" then process stops
+				if (49 < strlen(newFirstName)) { // If user enters more characters than he should he gets prompted to do it again
 					cls();
 					printf("First name cannot be longer than 49 characters! Ex. \"John\".\n\nPress enter to continue.\n");
 					getch();
 				}
 			} while (49 < strlen(newFirstName));
-			updateFile(Client->accountNumber, 1, newFirstName);
+			updateFile(Client->accountNumber, 1, newFirstName); // Updating data in account file
 			updateData(Client->accountNumber);
 			break;
 		case 2:
@@ -643,23 +654,23 @@ void manageData(char *firstName, char *lastName, char *pesel, char *nationality,
 	} while (menuChoice != 0);
 }
 
-void deleteAccount(char *accountNumber, float balance) {
+void deleteAccount(char *accountNumber, float balance) { // Deleting user account
 	int menuChoice;
 	char f[41];
 
-	printf("You are about to close your account.\nAre you sure you want to proceed?\n1. Yes\n2. No\n");
+	printf("You are about to close your account.\nAre you sure you want to proceed?\n1. Yes\n2. No\n"); // Ask if user wants to delete account
 	scanf("%d", &menuChoice);
 
 	switch (menuChoice)
 	{
 	case 1:
-		if (balance > 0.00) {
+		if (balance > 0.00) { // Check if balance is greater than 0, if it is then account cannot be deleted
 			cls();
 			printf("We cannot close your account, please withdraw all your money first.\n\nPress enter to continue.\n");
 			getch();
 			return;
 		} else {
-			sprintf(f, "accounts/%s.txt", accountNumber);
+			sprintf(f, "accounts/%s.txt", accountNumber); // Deleting account file
 			int del = remove(f);
 			if (!del) {
 				cls();
@@ -685,7 +696,7 @@ void deleteAccount(char *accountNumber, float balance) {
 }
 
 /* =============================================================== */
-void updateData(char *accountNumber) {
+void updateData(char *accountNumber) { // Updating data of currently logged in user
 	strcpy(Client->firstName, readLine(accountNumber, 1));
 	strcpy(Client->lastName, readLine(accountNumber, 2));
 	strcpy(Client->pesel, readLine(accountNumber, 3));
@@ -700,7 +711,7 @@ void updateData(char *accountNumber) {
 	Client->balance = strtof(readLine(accountNumber, 12), NULL);
 }
 
-void updateFile(char *accountNumber, int fileLine, char *newData) {
+void updateFile(char *accountNumber, int fileLine, char *newData) { // Updating data in account file
 	FILE *f;
 	FILE *fTemp;
 	char buffer[100], fAccountNumber[41];
@@ -710,36 +721,34 @@ void updateFile(char *accountNumber, int fileLine, char *newData) {
 	sprintf(newData, "%s\n", newData);
 
 	f = fopen(fAccountNumber, "r");
-	fTemp = fopen("replace.tmp", "w");
+	fTemp = fopen("replace.tmp", "w"); // Creating temp file
 	if (f == NULL || fTemp == NULL) {
-		//printf("\nFailed to open file.\n\nPress enter to continue.\n");
-		getch();
 		return;
 	}
 	
-	while ((fgets(buffer, 100, f)) != NULL) {
+	while ((fgets(buffer, 100, f)) != NULL) { // Going to desired line
 		count++;
-		if (count == fileLine) {
-			fputs(newData, fTemp);
+		if (count == fileLine) { // Check if loop is at desired line
+			fputs(newData, fTemp); // Replacing data
 		} else {
-			fputs(buffer, fTemp);
+			fputs(buffer, fTemp); // Copying data to temp file
 		}
 	}
 
 	fclose(f);
 	fclose(fTemp);
-	remove(fAccountNumber);
-	rename("replace.tmp", fAccountNumber);
+	remove(fAccountNumber); // Deleteing old original file
+	rename("replace.tmp", fAccountNumber); // Renaming temp file to real account file
 }
 
-void updateBalance(char *accountNumber, float amount) {
+void updateBalance(char *accountNumber, float amount) { // Updating balace
 	char newBalance[20];
 
 	sprintf(newBalance, "%.2f", strtof(readLine(accountNumber, 12), NULL) + amount);
 	updateFile(accountNumber, 12, newBalance);
 }
 
-int accountExistsCheck(char *accountNumber) {
+int accountExistsCheck(char *accountNumber) { // Check if account exists
 	FILE *f;
 	char fAccountNumber[41];
 	sprintf(fAccountNumber, "accounts/%s.txt", accountNumber);
@@ -752,7 +761,7 @@ int accountExistsCheck(char *accountNumber) {
 	}
 }
 
-char* readLine(char *accountNumber, int fileLine) { // reads line from account file
+char* readLine(char *accountNumber, int fileLine) { // Reading line from account file
 	char fAccountNumber[41];
 	int counter = 1;
 	char lineContent[100];
@@ -761,7 +770,6 @@ char* readLine(char *accountNumber, int fileLine) { // reads line from account f
 	FILE *f = fopen(fAccountNumber, "r");
 
 	if (f == NULL) {
-		//printf("Failed to open the file.\n");
 		goto jump;
 	}
 
@@ -776,22 +784,22 @@ char* readLine(char *accountNumber, int fileLine) { // reads line from account f
 	return lineContentPtr;
 }
 
-int stopOperation(char *string) { // stops operation after user enters "q"
+int stopOperation(char *string) { // Stopping operation if user enters "q"
 	if (strcmp(string, "q") == 0) {
 		return 1;
 	}
 	else return 0;
 }
 
-void printWrongChoice() { // default message for switch case
+void printWrongChoice() { // Default message for switch case
 	cls();
 	printf("Wrong choice!\n\nPress enter to continue.\n");
 }
 
-void cls() { //clears console
+void cls() { // Clearing the console
 	system("cls");
 }
 
-void end() { // ends program
+void end() { // Ending the program
 	exit(0);
 }
