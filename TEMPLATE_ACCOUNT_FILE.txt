@@ -1,0 +1,14 @@
+JOHN (first name)
+DOE (second name)
+12345678901 (pesel)
+POLISH (nationality)
+CGI123456 (id number)
+WHITE STREET 15 (address)
+111222333 (phone)
+123456789123456 (account number)
+PASSWORD (password)
+---------------- (credit card number)
+---- (credit card pin)
+0.00 (balance)
+
+
