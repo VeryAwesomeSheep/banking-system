@@ -29,7 +29,6 @@ void menuNotLoggedIn() { // Menu for not logged in users
 
 	do {
 		cls();
-		printf("ONION BANK\n\n");
 		printf("MENU\n1. Create account\n2. Log in\n0. Exit\n");
 		scanf("%d", &menuChoice);
 		cls();
@@ -73,7 +72,6 @@ void menuLoggedIn(char *accountNumberLoggedIn) { // Menu for not logged in users
 
 	do {
 		cls();
-		printf("ONION BANK\n\n");
 		printf("Welcome %s %s!\n\n", Client->firstName, Client->lastName);
 		printf("MENU\n1. Balance\n2. Money transfer\n3. Cash deposit\n4. Credit card\n5. History\n6. Your data\n7. Close account\n0. Log out\n", Client->firstName, Client->lastName);
 		scanf("%d", &menuChoice);
@@ -146,7 +144,6 @@ void createAccount() { // Account creation interface
     static char prefix[11] = "4611402004";
 
 	cls();
-	printf("ONION BANK\n\n");
 	printf("We are happy that you are interested in our services. Now we will go through the process of creating your account.\n");
 	printf("You can stop at any moment by typing \"q\".\n\nPress enter to continue.");
 	getch();
@@ -798,6 +795,7 @@ void printWrongChoice() { // Default message for switch case
 
 void cls() { // Clearing the console
 	system("cls");
+	printf("ONION BANK\n\n");
 }
 
 void end() { // Ending the program
