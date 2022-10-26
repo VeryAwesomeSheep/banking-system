@@ -1,5 +1,5 @@
 # banking-system
-Banking system is a project that I made for subject "Programming 1" at university. This version is translated from polish to english.
+Very simple banking system.
 
 Functions for not logged in users:
 - Create account
